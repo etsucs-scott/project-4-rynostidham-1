@@ -1,0 +1,22 @@
+﻿@page "/"
+@inject GameState Game
+@inject FileStorageService Storage
+
+<h3>Tower Defense</h3>
+
+<GameBoard GameState="Game" />
+<button @onclick="Save">Save</button>
+<button @onclick="Load">Load</button>
+
+@code {
+    private void Save()
+    {
+        Storage.Save(new GameSave { BestWave = Game.CurrentWave });
+    }
+
+    private void Load()
+    {
+        var save = Storage.Load();
+        Game.CurrentWave = save.BestWave;
+    }
+}
