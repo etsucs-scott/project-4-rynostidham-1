@@ -1,0 +1,108 @@
+/* ---- Reset & base ---- */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Segoe UI', sans-serif; background: #1a1a2e; color: #e0e0e0; }
+a { color: #7eb8f7; text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+/* ---- Menu page ---- */
+.menu-page { display: flex; flex-direction: column; align-items: center; justify-content: center;
+             min-height: 100vh; gap: 1.5rem; text-align: center; }
+.menu-page h1 { font-size: 3rem; color: #f7c948; letter-spacing: 2px; }
+.menu-page .subtitle { color: #aaa; font-size: 1.1rem; }
+.menu-buttons { display: flex; gap: 1rem; }
+.btn-primary, .btn-secondary { padding: 0.75rem 2rem; border-radius: 8px; font-size: 1rem;
+                                cursor: pointer; border: none; transition: opacity .15s; }
+.btn-primary { background: #f7c948; color: #1a1a2e; font-weight: bold; }
+.btn-secondary { background: #2e2e50; color: #e0e0e0; border: 1px solid #555; }
+.btn-primary:hover, .btn-secondary:hover { opacity: 0.85; }
+.top-scores { background: #16213e; padding: 1rem 2rem; border-radius: 12px; min-width: 300px; }
+.top-scores h2 { margin-bottom: 0.75rem; color: #f7c948; }
+.score-row { display: flex; justify-content: space-between; gap: 1rem; padding: 0.35rem 0;
+             border-bottom: 1px solid #2a2a4a; font-size: 0.9rem; }
+
+/* ---- Game page layout ---- */
+.game-page { display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+.game-layout { display: flex; flex: 1; overflow: hidden; }
+
+/* ---- HUD ---- */
+.hud { display: flex; align-items: center; gap: 1.5rem; padding: 0.6rem 1rem;
+       background: #16213e; border-bottom: 2px solid #2a2a4a; flex-wrap: wrap; }
+.hud-stat { display: flex; flex-direction: column; align-items: center; }
+.hud-label { font-size: 0.7rem; color: #888; text-transform: uppercase; }
+.hud-value { font-size: 1.1rem; font-weight: bold; }
+.hud-value.gold { color: #f7c948; }
+.hud-value.danger { color: #e74c3c; animation: pulse 1s infinite; }
+@keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.5; } }
+.hud-actions { display: flex; gap: 0.5rem; margin-left: auto; }
+.btn-wave { background: #27ae60; color: #fff; border: none; border-radius: 6px;
+            padding: 0.5rem 1.2rem; cursor: pointer; font-size: 0.95rem; }
+.btn-wave:disabled { background: #555; cursor: default; }
+.btn-save, .btn-load { background: #2e2e50; color: #e0e0e0; border: 1px solid #555;
+                        border-radius: 6px; padding: 0.4rem 0.9rem; cursor: pointer; }
+.btn-save:hover, .btn-load:hover { background: #3e3e70; }
+
+/* ---- Tower panel ---- */
+.tower-panel { width: 200px; min-width: 200px; background: #16213e; padding: 0.75rem;
+               overflow-y: auto; border-right: 2px solid #2a2a4a; }
+.tower-panel h3 { color: #f7c948; margin-bottom: 0.5rem; }
+.tower-panel .gold { color: #f7c948; font-weight: bold; margin-bottom: 0.4rem; }
+.hint { font-size: 0.75rem; color: #888; margin-bottom: 0.6rem; }
+.tower-option { display: flex; gap: 0.6rem; align-items: flex-start; padding: 0.5rem;
+                border-radius: 8px; cursor: pointer; border: 2px solid transparent;
+                margin-bottom: 0.5rem; transition: border-color .15s, background .15s; }
+.tower-option:hover { background: #1f2f5e; }
+.tower-option.selected { border-color: #f7c948; background: #1f2f5e; }
+.tower-icon-large { font-size: 1.8rem; line-height: 1; }
+.tower-details { display: flex; flex-direction: column; font-size: 0.8rem; gap: 2px; }
+.tower-details strong { font-size: 0.9rem; }
+.btn-deselect { width: 100%; margin-top: 0.5rem; padding: 0.4rem; background: #2a2a4a;
+                color: #aaa; border: 1px solid #555; border-radius: 6px; cursor: pointer; }
+
+/* ---- Game board ---- */
+.game-board { flex: 1; overflow: auto; padding: 0.5rem; background: #0f0f1a; display: flex;
+              flex-direction: column; align-items: flex-start; }
+.board-row { display: flex; }
+.cell { width: 36px; height: 36px; border: 1px solid #1a1a3a; display: flex; align-items: center;
+        justify-content: center; font-size: 0.85rem; position: relative; cursor: pointer;
+        flex-shrink: 0; transition: background 0.1s; }
+.cell.path { background: #2a2a1a; border-color: #3a3a2a; cursor: default; }
+.cell.buildable { background: #0d2b1a; }
+.cell.buildable:hover { background: #1a4a2a; }
+.cell.blocked { background: #1a0d0d; cursor: not-allowed; }
+.tower-icon { font-size: 1.3rem; cursor: pointer; }
+.tower-icon:hover { opacity: 0.7; }
+.tower-arrow { color: #7eb8f7; }
+.tower-mage  { color: #c39bd3; }
+.tower-cannon{ color: #f0a500; }
+.enemy-icon { font-size: 0.8rem; color: #e74c3c; font-weight: bold; position: absolute; }
+.projectile { color: #f7c948; font-size: 0.6rem; position: absolute; }
+
+/* ---- Overlays ---- */
+.overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.75);
+           display: flex; align-items: center; justify-content: center; z-index: 100; }
+.overlay-box { background: #16213e; border: 2px solid #f7c948; border-radius: 16px;
+               padding: 2rem 3rem; text-align: center; max-width: 400px; }
+.overlay-box h2 { font-size: 2rem; color: #e74c3c; margin-bottom: 1rem; }
+.overlay-box.victory h2 { color: #f7c948; }
+.overlay-box p { margin-bottom: 0.75rem; font-size: 1.1rem; }
+.overlay-box button { background: #27ae60; color: #fff; border: none; border-radius: 8px;
+                       padding: 0.6rem 1.4rem; cursor: pointer; font-size: 1rem; margin: 0.5rem; }
+.overlay-box a { display: inline-block; margin-top: 0.5rem; }
+
+/* ---- Toast ---- */
+.toast { position: fixed; top: 80px; left: 50%; transform: translateX(-50%);
+         padding: 0.6rem 1.5rem; border-radius: 8px; font-size: 0.95rem; z-index: 200;
+         animation: fadeInOut 3s ease forwards; }
+.toast.success { background: #27ae60; color: #fff; }
+.toast.error   { background: #e74c3c; color: #fff; }
+.toast.info    { background: #2980b9; color: #fff; }
+@keyframes fadeInOut { 0%{opacity:0} 10%{opacity:1} 80%{opacity:1} 100%{opacity:0} }
+
+/* ---- Leaderboard ---- */
+.leaderboard-page { max-width: 700px; margin: 2rem auto; padding: 1rem; }
+.leaderboard-page h1 { color: #f7c948; margin-bottom: 1rem; }
+.scores-table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+.scores-table th, .scores-table td { padding: 0.6rem 1rem; text-align: left;
+                                      border-bottom: 1px solid #2a2a4a; }
+.scores-table th { background: #16213e; color: #f7c948; }
+.scores-table tr:hover td { background: #16213e; }

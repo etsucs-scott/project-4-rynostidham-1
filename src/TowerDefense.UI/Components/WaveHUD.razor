@@ -1,0 +1,35 @@
+@using TowerDefense.Core.Models
+
+<div class="hud">
+    <div class="hud-stat">
+        <span class="hud-label">Wave</span>
+        <span class="hud-value">@State.Wave / @State.TotalWaves</span>
+    </div>
+    <div class="hud-stat">
+        <span class="hud-label">Gold</span>
+        <span class="hud-value gold">@State.Gold</span>
+    </div>
+    <div class="hud-stat">
+        <span class="hud-label">Base HP</span>
+        <span class="hud-value @(State.BaseHealth <= 5 ? "danger" : "")">@State.BaseHealth</span>
+    </div>
+    <div class="hud-stat">
+        <span class="hud-label">Score</span>
+        <span class="hud-value">@State.Score</span>
+    </div>
+    <div class="hud-actions">
+        <button class="btn-wave" disabled="@WaveInProgress" @onclick="OnStartWave">
+            @(WaveInProgress ? "Wave in progress..." : "Start Next Wave")
+        </button>
+        <button class="btn-save" @onclick="OnSave">Save</button>
+        <button class="btn-load" @onclick="OnLoad">Load</button>
+    </div>
+</div>
+
+@code {
+    [Parameter, EditorRequired] public GameState State { get; set; } = default!;
+    [Parameter] public bool WaveInProgress { get; set; }
+    [Parameter] public EventCallback OnStartWave { get; set; }
+    [Parameter] public EventCallback OnSave { get; set; }
+    [Parameter] public EventCallback OnLoad { get; set; }
+}

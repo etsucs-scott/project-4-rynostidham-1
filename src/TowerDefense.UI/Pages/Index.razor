@@ -1,0 +1,23 @@
+@page "/"
+@inject LeaderboardService Leaderboard
+
+<div class="menu-page">
+    <h1>Tower Defense</h1>
+    <p class="subtitle">Defend your base across 10 waves of enemies.</p>
+    <div class="menu-buttons">
+        <a class="btn-primary" href="/game">New Game</a>
+        <a class="btn-secondary" href="/leaderboard">Leaderboard</a>
+    </div>
+
+    <div class="top-scores">
+        <h2>Top Scores</h2>
+        @foreach (var score in Leaderboard.TopScores.Take(5))
+        {
+            <div class="score-row">
+                <span>@score.PlayerName</span>
+                <span>@score.Score pts</span>
+                <span>Wave @score.Wave</span>
+            </div>
+        }
+    </div>
+</div>

@@ -1,0 +1,39 @@
+@using TowerDefense.Core.Models
+
+<div class="tower-panel">
+    <h3>Towers</h3>
+    <p class="gold">Gold: @Gold</p>
+    <p class="hint">Click a tower to select, then click the board to place.</p>
+    <p class="hint">Click a placed tower to sell it for half price.</p>
+
+    @foreach (var (type, tower, icon) in TowerOptions)
+    {
+        var t = type; // capture
+        var isSelected = SelectedTower == type;
+        <div class="tower-option @(isSelected ? "selected" : "")" @onclick="() => OnSelectTower.InvokeAsync(t)">
+            <span class="tower-icon-large">@icon</span>
+            <div class="tower-details">
+                <strong>@tower.Name</strong>
+                <span>Cost: @tower.Cost g</span>
+                <span>DMG: @tower.Damage | RNG: @tower.Range</span>
+                <span>Cooldown: @tower.AttackCooldown s</span>
+            </div>
+        </div>
+    }
+
+    <button class="btn-deselect" @onclick="() => OnSelectTower.InvokeAsync(null)">Deselect</button>
+</div>
+
+@code {
+    [Parameter] public string? SelectedTower { get; set; }
+    [Parameter] public EventCallback<string?> OnSelectTower { get; set; }
+    [Parameter] public int Gold { get; set; }
+
+    // Tuple of (type key, sample instance for stats, display icon)
+    private static readonly List<(string, Tower, string)> TowerOptions = new()
+    {
+        ("Arrow", new ArrowTower(), "▲"),
+        ("Mage",  new MageTower(),  "★"),
+        ("Cannon",new CannonTower(),"●"),
+    };
+}

@@ -1,0 +1,130 @@
+@page "/game"
+@inject GameEngine Engine
+@inject LeaderboardService Leaderboard
+@implements IDisposable
+
+<div class="game-page">
+    <WaveHUD State="Engine.State" OnStartWave="StartWave" OnSave="SaveGame" OnLoad="LoadGame"
+             WaveInProgress="Engine.WaveInProgress" />
+
+    @if (!string.IsNullOrEmpty(_message))
+    {
+        <div class="toast @_messageClass">@_message</div>
+    }
+
+    @if (Engine.State.IsGameOver)
+    {
+        <div class="overlay">
+            <div class="overlay-box">
+                <h2>Game Over</h2>
+                <p>Your base was destroyed on wave @Engine.State.Wave.</p>
+                <p>Score: @Engine.State.Score</p>
+                <button @onclick="SubmitScore">Submit Score</button>
+                <a href="/">Return to Menu</a>
+            </div>
+        </div>
+    }
+    else if (Engine.State.IsVictory)
+    {
+        <div class="overlay">
+            <div class="overlay-box victory">
+                <h2>Victory!</h2>
+                <p>You survived all @Engine.State.TotalWaves waves!</p>
+                <p>Final Score: @Engine.State.Score</p>
+                <button @onclick="SubmitScore">Submit Score</button>
+                <a href="/">Return to Menu</a>
+            </div>
+        </div>
+    }
+
+    <div class="game-layout">
+        <TowerPanel SelectedTower="_selectedTowerType"
+                    OnSelectTower="t => _selectedTowerType = t"
+                    Gold="Engine.State.Gold" />
+        <GameBoard Engine="Engine" SelectedTowerType="_selectedTowerType"
+                   OnCellClick="HandleCellClick" OnTowerClick="HandleTowerClick" />
+    </div>
+</div>
+
+@code {
+    private string? _selectedTowerType;
+    private string _message = "";
+    private string _messageClass = "";
+    private System.Threading.Timer? _messageTimer;
+
+    protected override void OnInitialized()
+    {
+        Engine.OnStateChanged += HandleStateChanged;
+        Engine.Start();
+    }
+
+    private async void HandleStateChanged()
+    {
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private void StartWave() => Engine.StartNextWave();
+
+    private void HandleCellClick((int x, int y) pos)
+    {
+        if (_selectedTowerType == null) return;
+        Tower tower = _selectedTowerType switch
+        {
+            "Arrow" => new ArrowTower(),
+            "Mage" => new MageTower(),
+            "Cannon" => new CannonTower(),
+            _ => new ArrowTower()
+        };
+
+        bool placed = Engine.PlaceTower(tower, pos.x, pos.y);
+        if (placed) { Engine.RecalculatePath(); ShowMessage("Tower placed!", "success"); }
+        else ShowMessage("Cannot place tower here.", "error");
+    }
+
+    private void HandleTowerClick(Guid towerId)
+    {
+        bool removed = Engine.RemoveTower(towerId);
+        if (removed) { Engine.RecalculatePath(); ShowMessage("Tower sold for half price.", "info"); }
+    }
+
+    private async Task SaveGame()
+    {
+        try { await Engine.SaveAsync(); ShowMessage("Game saved!", "success"); }
+        catch (Exception ex) { ShowMessage($"Save failed: {ex.Message}", "error"); }
+    }
+
+    private async Task LoadGame()
+    {
+        try { await Engine.LoadAsync(); ShowMessage("Game loaded!", "success"); }
+        catch (Exception ex) { ShowMessage($"Load failed: {ex.Message}", "error"); }
+    }
+
+    private void SubmitScore()
+    {
+        Leaderboard.AddScore(new ScoreEntry
+        {
+            PlayerName = "Player",
+            Score = Engine.State.Score,
+            Wave = Engine.State.Wave
+        });
+        ShowMessage("Score submitted!", "success");
+    }
+
+    private void ShowMessage(string msg, string type)
+    {
+        _message = msg;
+        _messageClass = type;
+        _messageTimer?.Dispose();
+        _messageTimer = new System.Threading.Timer(_ =>
+        {
+            _message = "";
+            InvokeAsync(StateHasChanged);
+        }, null, 3000, Timeout.Infinite);
+    }
+
+    public void Dispose()
+    {
+        Engine.OnStateChanged -= HandleStateChanged;
+        _messageTimer?.Dispose();
+    }
+}

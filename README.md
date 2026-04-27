@@ -1,43 +1,81 @@
-[![Review Assignment Due Date](https://classroom.github.com/assets/deadline-readme-button-22041afd0340ce965d47ae6ef1cefeee28c7c493a6346c4f15d667ab976d596c.svg)](https://classroom.github.com/a/qJo95Bxr)
-# CSCI 1260 — Project
+# Tower Defense — Project 4
 
-## Project Instructions
-All project requirements, grading criteria, and submission details are provided on **D2L**.  
-Refer to D2L as the *authoritative source* for this assignment.
+A browser-based Tower Defense game built with **Blazor Server** (.NET 8).
 
-This repository is intentionally minimal. You are responsible for:
-- Creating the solution and projects
-- Designing the class structure
-- Implementing the required functionality
+## How to Build and Run
 
----
-
-## Getting Started (CLI)
-
-You may use **Visual Studio**, **VS Code**, or the **terminal**.
-
-### Create a solution
-```bash
-dotnet new sln -n ProjectName
-```
-
-### Create a project (example: console app)
-```bash
-dotnet new console -n ProjectName.App
-```
-
-### Add the project to the solution
-```bash
-dotnet sln add ProjectName.App
-```
-
-### Build and run
 ```bash
 dotnet build
-dotnet run --project ProjectName.App
+dotnet run --project src/TowerDefense.UI
 ```
 
-## Notes
-- Commit early and commit often.
-- Your repository history is part of your submission.
-- Update this README with build/run instructions specific to your project.
+Then open http://localhost:5000 in your browser.
+
+## How to Run Unit Tests
+
+```bash
+dotnet test src/TowerDefense.Tests 
+```
+
+There are 14 passing unit tests covering PathFinder, Tower, Enemy, WaveManager, and SaveGameService.
+
+## Tech Stack
+
+| Layer | Technology |
+|---|---|
+| UI | Blazor Server (ASP.NET Core) |
+| Language | C# 12 / .NET 8 |
+| Styling | Plain CSS |
+| Testing | xUnit |
+| Serialization | System.Text.Json |
+
+**New framework learned:** Blazor Server — specifically the pattern of using `System.Threading.Timer` to drive a real-time game loop and pushing state updates to the browser via `InvokeAsync(StateHasChanged)`.
+
+## Key Features
+
+- 20×12 grid map with a winding enemy path
+- 3 tower types: Arrow, Mage, Cannon (each with different damage/range/cooldown)
+- 3 enemy types: Goblin (fast), Troll (tanky), Boss Orc (boss on wave 10)
+- 10 escalating waves
+- Click to place towers, click placed towers to sell for half price
+- Save/Load game state to `data/savegame.json`
+- Leaderboard persisted to `data/leaderboard.csv`
+
+## Data Structures Used
+
+- `Dictionary<(int,int), Cell>` — O(1) grid cell lookup
+- `Dictionary<Guid, Tower>` — tower registry by ID
+- `PriorityQueue<Enemy, int>` — targeting: towers prioritize enemies furthest along the path
+- `SortedSet<ScoreEntry>` — leaderboard auto-sorted by score descending
+- `Queue<WaveDefinition>` — ordered pending wave queue
+- `Queue<Enemy>` — per-wave ordered spawn queue
+
+## File I/O
+
+- **Save file:** `data/savegame.json` — full `GameState` serialized with `System.Text.Json`
+- **Leaderboard:** `data/leaderboard.csv` — scores as CSV, top 100 entries kept
+- All file operations wrapped in `try/catch` with user-friendly error messages shown as toast notifications
+
+## UML Diagram
+
+See `uml/TowerDefense.asta` (or `uml/TowerDefense.png` for the exported image).
+
+The diagram covers: `Tower` and `Enemy` inheritance hierarchies, `GameEngine` composition, service relationships (`WaveManager`, `PathFinder`, `SaveGameService`, `LeaderboardService`), and data model classes.
+
+## Project Structure
+
+```
+src/
+  TowerDefense.Core/     # Domain models and services (no UI dependency)
+    Models/              # Cell, Tower, Enemy, Projectile, GameState, ScoreEntry
+    Services/            # GameEngine, WaveManager, PathFinder, SaveGameService, LeaderboardService
+  TowerDefense.UI/       # Blazor Server app
+    Pages/               # Index, Game, Leaderboard
+    Components/          # GameBoard, TowerPanel, WaveHUD
+  TowerDefense.Tests/    # xUnit tests
+```
+
+## Citations / External Resources
+
+- [Blazor Server documentation](https://learn.microsoft.com/en-us/aspnet/core/blazor/)
+- [BFS pathfinding algorithm](https://en.wikipedia.org/wiki/Breadth-first_search)

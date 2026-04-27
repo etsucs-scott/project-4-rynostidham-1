@@ -1,0 +1,96 @@
+@using TowerDefense.Core.Models
+@using TowerDefense.Core.Services
+
+<div class="game-board">
+    @for (int row = 0; row < Engine.MapHeight; row++)
+    {
+        <div class="board-row">
+            @for (int col = 0; col < Engine.MapWidth; col++)
+            {
+                var x = col; var y = row;
+                var cell = Engine.Grid.TryGetValue((x, y), out var c) ? c : null;
+                var cssClass = GetCellClass(cell);
+
+                <div class="cell @cssClass" @onclick="() => HandleClick(cell, x, y)" title="@GetTooltip(cell)">
+                    @if (cell?.Tower != null)
+                    {
+                        var tid = cell.Tower.Id;
+                        <span class="tower-icon @GetTowerClass(cell.Tower)"
+                              @onclick:stopPropagation="true"
+                              @onclick="() => OnTowerClick.InvokeAsync(tid)">
+                            @GetTowerIcon(cell.Tower)
+                        </span>
+                    }
+                    @{
+                        var nearbyEnemies = Engine.Enemies.Where(e => (int)e.X == x && (int)e.Y == y);
+                        foreach (var enemy in nearbyEnemies)
+                        {
+                            var hpPct = (int)(enemy.HealthPercent * 100);
+                            <span class="enemy-icon" title="@enemy.Name @hpPct%">
+                                @GetEnemyIcon(enemy)
+                            </span>
+                        }
+                        var nearbyProj = Engine.Projectiles.Where(p => (int)p.X == x && (int)p.Y == y);
+                        foreach (var proj in nearbyProj)
+                        {
+                            <span class="projectile">•</span>
+                        }
+                    }
+                </div>
+            }
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter, EditorRequired] public GameEngine Engine { get; set; } = default!;
+    [Parameter] public string? SelectedTowerType { get; set; }
+    [Parameter] public EventCallback<(int x, int y)> OnCellClick { get; set; }
+    [Parameter] public EventCallback<Guid> OnTowerClick { get; set; }
+
+    private void HandleClick(Cell? cell, int x, int y)
+    {
+        if (cell == null) return;
+        if (cell.Tower != null) OnTowerClick.InvokeAsync(cell.Tower.Id);
+        else if (cell.Type == CellType.Buildable) OnCellClick.InvokeAsync((x, y));
+    }
+
+    private static string GetCellClass(Cell? cell) => cell?.Type switch
+    {
+        CellType.Path => "path",
+        CellType.Buildable => "buildable",
+        CellType.Blocked => "blocked",
+        _ => ""
+    };
+
+    private static string GetTowerClass(Tower t) => t switch
+    {
+        ArrowTower => "tower-arrow",
+        MageTower => "tower-mage",
+        CannonTower => "tower-cannon",
+        _ => ""
+    };
+
+    private static string GetTowerIcon(Tower t) => t switch
+    {
+        ArrowTower => "▲",
+        MageTower => "★",
+        CannonTower => "●",
+        _ => "T"
+    };
+
+    private static string GetEnemyIcon(Enemy e) => e switch
+    {
+        Goblin => "G",
+        Troll => "T",
+        BossOrc => "B",
+        _ => "?"
+    };
+
+    private static string GetTooltip(Cell? cell)
+    {
+        if (cell?.Tower != null)
+            return $"{cell.Tower.Name} | DMG:{cell.Tower.Damage} RNG:{cell.Tower.Range} [Click to sell]";
+        return cell?.Type.ToString() ?? "";
+    }
+}
